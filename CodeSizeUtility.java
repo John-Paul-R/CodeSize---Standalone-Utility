@@ -20,48 +20,67 @@ public final class CodeSizeUtility
 	 */
 	public static void main(String[] args)
 	{
-		String format = "%s %s";
+		String format = "%s %s\n";
 		String prefix = "[CodeSizeUtility] ";
 		File input = null;
 		Integer size = new Integer(-1);
+		Scanner sc = new Scanner(System.in);
 		
-		if (args.length > 0)
+		String in = null;
+		do
 		{
-			input = new File(args[0]);
-
-		}
-		else
-		{
-			Scanner sc = new Scanner(System.in);
-			System.out.println(String.format(format, prefix, "Enter the directory or .jar file path > "));
-			boolean completedOnce = false;
-			while (input == null)
+			if (args != null && args.length > 0)
 			{
-				if (completedOnce)
-				{
-					System.out.println(String.format(format, prefix, "Invalid file or directory path. "));
-					System.out.println(String.format(format, prefix, "Enter the directory or .jar file path > "));
-				}
-				String in = sc.nextLine().replaceAll("\"", "");;
-				input = new File(in);
+				in = args[0];
 			}
-			sc.close();
-		}
-
-		if (input.isFile() && (input.getName().endsWith(".jar") || input.getName().endsWith(".zip")))
-		{
-			System.out.println(String.format(format, prefix, "Checking jarfile codesize."));
-			size = getJarFileCodeSize(input);
-		}
-		else if (input.isDirectory())
-		{
-			System.out.println(String.format(format, prefix, "Checking directory codesize.  (Note: The code size of a directory will be larger than the code size of a packaged robot. (.jar files use zip compression))"));
-			size = getDirectoryCodeSize(input);
-		}
-		
-		System.out.println(String.format(format, prefix, "Codesize for '" + input.getName() + "': " + size + " bytes"));
-/*		sc.nextLine();
-		sc.close();*/
+			else
+			{
+				while (in == null)
+				{
+					if (in == null)
+					{
+						System.out.printf("%s %s", prefix, "Enter the directory or .jar file path\n> ");
+						in = sc.nextLine();
+					}
+				}
+				if (in.indexOf('"') != -1)
+				{
+					 in = in.replaceAll("\"", "");;
+				}
+			}
+			
+			
+			input = new File(in);
+			if (input.isFile() && (input.getName().endsWith(".jar") || input.getName().endsWith(".zip")))
+			{
+				System.out.printf(format, prefix, "Checking jarfile codesize...");
+				size = getJarFileCodeSize(input);
+			}
+			else if (input.isDirectory())
+			{
+				System.out.printf(format, prefix, "Checking directory codesize...");
+				size = getDirectoryCodeSize(input);
+			}
+			
+			if (size == -1)
+			{
+				System.out.printf(format, prefix, "An error occoured. You specified the path: " + input.getAbsolutePath() +
+						"\n\t\t   Check to make sure that the file path is correct and that CodeSizeUtility has read access to it.");
+			}
+			else
+			{
+				System.out.printf(format, prefix, "Codesize for '" + input.getAbsolutePath() + "': " + size + " bytes");
+			}
+	/*		sc.nextLine();
+			sc.close();*/
+			input = null;
+			size = -1;
+			args = null;
+			System.out.println();
+			System.out.printf("%s %s",prefix,"Enter the path of another file to check its codesize, or type \"exit\" to exit.\n> ");
+			in=sc.nextLine();
+		} while(!in.equalsIgnoreCase("exit"));
+		sc.close();
 	}
 
 
